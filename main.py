@@ -184,11 +184,11 @@ def main():
     screen = pygame.display.set_mode((GAME_WIDHT, GAME_HEIGHT))
     pygame.display.set_caption('my game')
 
-    SOUND['die'] = pygame.mixer.Sound('assets/audio/die.wav').set_volume(0.2)
-    SOUND['hit'] = pygame.mixer.Sound('assets/audio/hit.wav').set_volume(0.2)
-    SOUND['point'] = pygame.mixer.Sound('assets/audio/point.wav').set_volume(0.2)
-    SOUND['swoosh'] = pygame.mixer.Sound('assets/audio/swoosh.wav').set_volume(0.2)
-    SOUND['wing'] = pygame.mixer.Sound('assets/audio/wing.wav').set_volume(0.2)
+    SOUND['die'] = pygame.mixer.Sound('assets/audio/die.wav')
+    SOUND['hit'] = pygame.mixer.Sound('assets/audio/hit.wav')
+    SOUND['point'] = pygame.mixer.Sound('assets/audio/point.wav')
+    SOUND['swoosh'] = pygame.mixer.Sound('assets/audio/swoosh.wav')
+    SOUND['wing'] = pygame.mixer.Sound('assets/audio/wing.wav')
 
     IMAGE['numbs'] = [
         pygame.image.load('assets/sprites/0.png').convert_alpha(),
@@ -244,7 +244,44 @@ def main():
         )
 
         playMoment = showWellcom()
-        gameMain(playMoment)
+        crashes = gameMain(playMoment)
+        showGameOver(crashes)
+
+
+def showGameOver(crashes):
+    crore = crashes['score']
+    plrY = crashes['y']
+    plrX = GAME_WIDHT * 0.2
+    plrH = IMAGE['player'][0].get_height()
+    plrVelY = IMAGE['playerVelY']
+    plrRot = crashes['plrRot']
+    baseX = crashes['baseX']
+    baseY = int(GAME_HEIGHT * 0.8)
+
+    upperPipes, lowerPipes = crashes['uPipes'], crashes['lPipes']
+    SOUND['hit'].play()
+    if not crashes['groundCrash']:
+        SOUND['die'].play()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if plrY + plrH >= baseY - 1:
+                    return
+
+        if plrY + plrH < baseY - 1:
+            plrY += min(plrVelY, baseY - plrY - plrH)
+
+        if plrVelY < 15:
+            plrVelY += 2
+
+        if not crashes['groundCrashes']:
+            if plrRot > -90:
+                plrRot -= 7
+
+            plrSurface = pygame.transform.rotate(IMAGE['player'][0], plrRot)
 
 
 def showScore(score):
